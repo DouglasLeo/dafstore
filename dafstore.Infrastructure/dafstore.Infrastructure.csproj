@@ -4,4 +4,18 @@
 
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EFCore.NamingConventions" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dafstore.Application\dafstore.Application.csproj" />
+    <ProjectReference Include="..\dafstore.Domain\dafstore.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

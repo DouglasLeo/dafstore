@@ -4,9 +4,11 @@ namespace dafstore.Domain.Contexts.ProductContext.Entities;
 
 public class Pants : Product
 {
-    public Pants(long stockId, string name, string description, decimal price, ESize size, string color,
+    private Pants () : base() { }
+    
+    public Pants(Guid stockId, string name, string description, decimal price, ESize size, string[] colors, IEnumerable<Category> categories,
         EPantsTissueType tissueType, IEnumerable<string> imagesKeys, bool inStock = false)
-        : base(stockId, name, description, price, size, color, imagesKeys, inStock)
+        : base(stockId, name, description, price, size, colors, categories,imagesKeys, inStock)
     {
         TissueType = tissueType;
     }

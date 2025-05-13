@@ -5,6 +5,8 @@ namespace dafstore.Domain.Contexts.ProductContext.Entities;
 
 public class Category : Entity
 {
+    private Category () { }
+    
     public Category(CategoryName name, string? description = null)
     {
         Name = name;

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dafstore.Application", "daf
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dafstore.Infrastructure", "dafstore.Infrastructure\dafstore.Infrastructure.csproj", "{3B989469-8842-45D4-A747-1E62B5239F01}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dafstore.API", "dafstore.API\dafstore.API.csproj", "{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,8 +57,22 @@ Global
 		{3B989469-8842-45D4-A747-1E62B5239F01}.Release|x64.Build.0 = Release|Any CPU
 		{3B989469-8842-45D4-A747-1E62B5239F01}.Release|x86.ActiveCfg = Release|Any CPU
 		{3B989469-8842-45D4-A747-1E62B5239F01}.Release|x86.Build.0 = Release|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Debug|x64.Build.0 = Debug|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Debug|x86.Build.0 = Debug|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Release|x64.ActiveCfg = Release|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Release|x64.Build.0 = Release|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Release|x86.ActiveCfg = Release|Any CPU
+		{186B0757-A89C-4823-9CE6-A1EF3B7EFE85}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 EndGlobal
