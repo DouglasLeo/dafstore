@@ -6,8 +6,10 @@ namespace dafstore.Domain.Contexts.OrderContext.Entities;
 
 public class Order : Entity
 {
+    private Order () { }
+    
     public Order(Guid userId, DateTimeOffset orderDate, EOrderStatus orderStatus,
-        IReadOnlyCollection<OrderItem> orderItems, EPaymentMethod paymentMethod, float total,
+        IReadOnlyCollection<OrderItem> orderItems, EPaymentMethod paymentMethod, decimal total,
         DeliveryAddress deliveryAddress)
     {
         UserId = userId;
@@ -24,7 +26,7 @@ public class Order : Entity
     public EOrderStatus OrderStatus { get; private set; }
     public IReadOnlyCollection<OrderItem> OrderItems { get; }
     public EPaymentMethod PaymentMethod { get; }
-    public float Total { get; }
+    public decimal Total { get; }
     public DeliveryAddress DeliveryAddress { get; }
 
     public void UpdateStatus(EOrderStatus status)

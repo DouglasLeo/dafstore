@@ -6,13 +6,14 @@ public class ShoppingCart : Entity
 {
     private List<ShoppingCartItem> _shoppingCartItem = [];
 
-    public ShoppingCart(Guid userId, IEnumerable<ShoppingCartItem> shoppingCartItems)
+    private ShoppingCart() { }
+    
+    public ShoppingCart(Guid userId)
     {
         UserId = userId;
-        AddShoppingCartItem(shoppingCartItems);
     }
 
-    public Guid UserId { get; set; }
+    public Guid UserId { get; private set; }
     public IReadOnlyCollection<ShoppingCartItem> ShoppingCartItems => _shoppingCartItem.ToArray();
 
     public void AddShoppingCartItem(IEnumerable<ShoppingCartItem> items) => _shoppingCartItem.AddRange(items);
@@ -20,13 +21,17 @@ public class ShoppingCart : Entity
 
 public class ShoppingCartItem
 {
-    public ShoppingCartItem(Guid productId, int quantity, decimal price)
+    public ShoppingCartItem(Guid shoppingCartId,Guid productId, int quantity, decimal price)
     {
+        Id = Guid.CreateVersion7();
+        ShoppingCartId = shoppingCartId;
         ProductId = productId;
         Quantity = quantity;
         Price = price;
     }
 
+    public Guid Id { get; }
+    public Guid ShoppingCartId { get; }
     public Guid ProductId { get; private set; }
     public int Quantity { get; private set; }
     public decimal Price { get; private set; }
