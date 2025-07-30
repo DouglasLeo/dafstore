@@ -20,7 +20,13 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Entity
 
     public async Task<List<TEntity>> FindAllAsync() => await DbSet.AsNoTracking().ToListAsync();
 
+    public async Task<List<TEntity>> FindAllAsync(int skip, int take) =>
+        await DbSet.AsNoTracking().Skip(skip).Take(take).ToListAsync();
+
     public async Task<TEntity?> FindByIdAsync(Guid id) => await DbSet.FindAsync(id);
+
+    public async Task<IEnumerable<TEntity>> FindAllByIdsAsync(IEnumerable<Guid> ids) =>
+        await DbSet.Where(i => ids.Contains(i.Id)).AsNoTracking().ToListAsync();
 
     public async Task<IEnumerable<TEntity>> SearchAsync(Expression<Func<TEntity, bool>> predicate) =>
         await DbSet.AsNoTracking().Where(predicate).ToListAsync();
