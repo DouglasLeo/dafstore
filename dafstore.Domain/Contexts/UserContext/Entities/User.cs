@@ -12,12 +12,12 @@ public class User : Entity
     
     private User () { }
     
-    public User(UserName userName, Email email, string password, Address addresses, Phone phone)
+    public User(UserName userName, Email email, string password, Address address, Phone phone)
     {
         UserName = userName;
         Email = email;
         Password = password;
-        AddAddress(addresses);
+        AddAddress(address);
         Phone = phone;
         ShoppingCart = new ShoppingCart(Id);
     }

@@ -5,5 +5,6 @@ namespace dafstore.Application.Orders.Abstractions.Repositories;
 
 public interface IOrderRepository : IRepository<Order>
 {
-    Task<IEnumerable<Order>> GetByUserIdAsync(Guid userId);
+    Task<IEnumerable<Order>> GetOrderByIdAsync(Guid id);
+    Task<IEnumerable<Order>> GetOrderByUserIdAsync(Guid userId);
 }

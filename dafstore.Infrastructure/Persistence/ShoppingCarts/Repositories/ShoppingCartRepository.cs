@@ -10,4 +10,6 @@ public class ShoppingCartRepository : Repository<ShoppingCart>, IShoppingCartRep
     public ShoppingCartRepository(ApplicationDbContext context) : base(context)
     {
     }
+
+    public async Task<ShoppingCart?> GetByUserIdAsync(Guid id) => await DbSet.FindAsync(id);
 }

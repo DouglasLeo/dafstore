@@ -7,7 +7,7 @@ public class ShoppingCart : Entity
     private List<ShoppingCartItem> _shoppingCartItem = [];
 
     private ShoppingCart() { }
-    
+
     public ShoppingCart(Guid userId)
     {
         UserId = userId;
@@ -16,12 +16,22 @@ public class ShoppingCart : Entity
     public Guid UserId { get; private set; }
     public IReadOnlyCollection<ShoppingCartItem> ShoppingCartItems => _shoppingCartItem.ToArray();
 
-    public void AddShoppingCartItem(IEnumerable<ShoppingCartItem> items) => _shoppingCartItem.AddRange(items);
+    public void AddShoppingCartItem(ShoppingCartItem item)
+    {
+        _shoppingCartItem.Clear();
+        _shoppingCartItem.Add(item);
+    }
+
+    public void AddShoppingCartItems(IEnumerable<ShoppingCartItem> items)
+    {
+        _shoppingCartItem.Clear();
+        _shoppingCartItem.AddRange(items);
+    }
 }
 
 public class ShoppingCartItem
 {
-    public ShoppingCartItem(Guid shoppingCartId,Guid productId, int quantity, decimal price)
+    public ShoppingCartItem(Guid shoppingCartId, Guid productId, int quantity, decimal price)
     {
         Id = Guid.CreateVersion7();
         ShoppingCartId = shoppingCartId;
