@@ -1,6 +1,8 @@
 using dafstore.Application.Products.Abstractions.Repositories;
+using dafstore.Application.Products.Commands.Shared;
 using dafstore.Domain.Contexts.ProductContext.Entities;
 using dafstore.Domain.Contexts.ProductContext.Enums;
+using dafstore.Domain.Contexts.ProductContext.ValueObjects;
 using MediatR;
 
 namespace dafstore.Application.Products.Commands.CreatePants;
@@ -12,7 +14,7 @@ public record CreatePantsCommand(
     int Quantity,
     ESize Size,
     string[] Colors,
-    IEnumerable<Category> Categories,
+    IEnumerable<CategoryDTO> Categories,
     EPantsTissueType TissueType,
     IEnumerable<string> Images) : IRequest<Guid>;
 
@@ -30,8 +32,11 @@ public class CreatePantsHandler : IRequestHandler<CreatePantsCommand, Guid>
         var stockId = Guid.NewGuid();
         //TODO:Criar evento para enviar o item para a api que gerencia os precos
         
+        var categories = request.Categories.Select(c =>
+            new Category(new CategoryName(c.Name),c.Description));
+        
         var pants = new Pants(stockId, request.Name, request.Description, request.Price, request.Size, request.Colors,
-            request.Categories, request.TissueType, request.Images, request.Quantity > 0);
+            categories, request.TissueType, request.Images, request.Quantity > 0);
 
         await _repository.AddAsync(pants);
         await _repository.SaveChangesAsync();

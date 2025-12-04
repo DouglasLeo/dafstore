@@ -14,29 +14,35 @@ public class OrdersEndpoints : EndpointGroupBase
     public override void Map(WebApplication app)
     {
         app.MapGroup(this)
-            //.RequireAuthorization()
+            .RequireAuthorization()
             .MapGet(GetOrderByIdAsync, "{id}")
-            .MapGet(GetOrderByIdAsync, "{userId}")
+            .MapGet(GetOrderByUserIdAsync, "user/{userId}")
             .MapPost(CreateOrder)
             .MapPut(UpdateOrder, "{id}");
     }
 
-    public async Task<Results<Ok<OrderDTO>, NotFound>> GetOrderByIdAsync(ISender sender, Guid id)
+    public async Task<Results<Ok<OrderDTO>, NotFound>> GetOrderByIdAsync(
+        [FromRoute]Guid id,
+        ISender sender)
     {
         var result = await sender.Send(new GetOrderByIdQuery(id));
 
         return result != null ? TypedResults.Ok(result) : TypedResults.NotFound();
     }
 
-    public async Task<Results<Ok<OrderDTO>, NotFound>> GetOrderByUserIdAsync(ISender sender, Guid userId)
+    public async Task<Results<Ok<IEnumerable<OrderDTO>>, NotFound>> GetOrderByUserIdAsync(
+        [FromRoute] Guid userId,
+        ISender sender)
     {
         var result = await sender.Send(new GetOrderByUserIdQuery(userId));
 
         return result != null ? TypedResults.Ok(result) : TypedResults.NotFound();
     }
 
-    public async Task<Results<Created<Guid>, ValidationProblem>> CreateOrder(ISender sender,
-        IValidator<CreateOrderCommand> validator, [FromBody] CreateOrderCommand command,
+    public async Task<Results<Created<Guid>, ValidationProblem>> CreateOrder(
+        [FromBody] CreateOrderCommand command,
+        ISender sender,
+        IValidator<CreateOrderCommand> validator,
         CancellationToken cancellationToken)
     {
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
@@ -48,8 +54,11 @@ public class OrdersEndpoints : EndpointGroupBase
         return TypedResults.Created($"/{nameof(OrdersEndpoints)}/{id}", id);
     }
 
-    public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdateOrder(ISender sender,
-        IValidator<UpdateOrderCommand> validator, Guid id, [FromBody] UpdateOrderCommand command,
+    public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdateOrder(
+        [FromRoute] Guid id, 
+        [FromBody] UpdateOrderCommand command,
+        ISender sender,
+        IValidator<UpdateOrderCommand> validator,
         CancellationToken cancellationToken)
     {
         if (id != command.Id) return TypedResults.BadRequest();

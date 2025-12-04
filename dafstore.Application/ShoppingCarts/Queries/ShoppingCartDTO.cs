@@ -29,7 +29,7 @@ public class ShoppingCartItemDTO
     {
         public Mapping()
         {
-            CreateMap<ShoppingCartItem, ShoppingCartItemDTO>();
+            CreateMap<ShoppingCartItem, ShoppingCartItemDTO>().ReverseMap();
         }
     }
 }

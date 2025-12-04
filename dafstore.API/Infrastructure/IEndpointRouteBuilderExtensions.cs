@@ -22,6 +22,15 @@ public static class EndpointRouteBuilderExtensions
         return builder;
     }
 
+    public static IEndpointConventionBuilder MapPostAllowAnonymous(this IEndpointRouteBuilder builder, Delegate handler,
+        [StringSyntax("Route")] string pattern = "")
+    {
+        var endpoint = builder.MapPost(pattern, handler)
+            .WithName(handler.Method.Name).AllowAnonymous();
+
+        return endpoint;
+    }
+
     public static IEndpointRouteBuilder MapPut(this IEndpointRouteBuilder builder, Delegate handler,
         [StringSyntax("Route")] string pattern)
     {

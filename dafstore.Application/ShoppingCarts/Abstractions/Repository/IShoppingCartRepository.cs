@@ -6,4 +6,5 @@ namespace dafstore.Application.ShoppingCarts.Abstractions.Repository;
 public interface IShoppingCartRepository : IRepository<ShoppingCart>
 {
     Task<ShoppingCart?> GetByUserIdAsync(Guid id);
+    Task<ShoppingCart?> GetByIdAsync(Guid id);
 }

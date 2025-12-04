@@ -18,7 +18,7 @@ namespace dafstore.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -40,6 +40,25 @@ namespace dafstore.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_category_product_product_id");
 
                     b.ToTable("category_product", (string)null);
+                });
+
+            modelBuilder.Entity("UserRole", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("RoleId", "UserId")
+                        .HasName("pk_user_role");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_role_user_id");
+
+                    b.ToTable("user_role", (string)null);
                 });
 
             modelBuilder.Entity("dafstore.Domain.Contexts.OrderContext.Entities.Order", b =>
@@ -253,6 +272,33 @@ namespace dafstore.Infrastructure.Persistence.Migrations
                     b.ToTable("shopping_cart_items", (string)null);
                 });
 
+            modelBuilder.Entity("dafstore.Domain.Contexts.UserContext.Entities.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_roles");
+
+                    b.ToTable("roles", (string)null);
+                });
+
             modelBuilder.Entity("dafstore.Domain.Contexts.UserContext.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -346,49 +392,31 @@ namespace dafstore.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_category_product_product_product_id");
                 });
 
+            modelBuilder.Entity("UserRole", b =>
+                {
+                    b.HasOne("dafstore.Domain.Contexts.UserContext.Entities.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_role_roles_role_id");
+
+                    b.HasOne("dafstore.Domain.Contexts.UserContext.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_role_users_user_id");
+                });
+
             modelBuilder.Entity("dafstore.Domain.Contexts.OrderContext.Entities.Order", b =>
                 {
                     b.HasOne("dafstore.Domain.Contexts.UserContext.Entities.User", null)
-                        .WithMany("Orders")
+                        .WithMany("_orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_orders_users_user_id");
-
-                    b.OwnsMany("dafstore.Domain.Contexts.OrderContext.Entities.OrderItem", "OrderItems", b1 =>
-                        {
-                            b1.Property<Guid>("OrderId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("order_id");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("integer")
-                                .HasColumnName("id");
-
-                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
-
-                            b1.Property<decimal>("Price")
-                                .HasColumnType("numeric")
-                                .HasColumnName("price");
-
-                            b1.Property<Guid>("ProductId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("product_id");
-
-                            b1.Property<int>("Quantity")
-                                .HasColumnType("integer")
-                                .HasColumnName("quantity");
-
-                            b1.HasKey("OrderId", "Id")
-                                .HasName("pk_order_items");
-
-                            b1.ToTable("order_items", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("OrderId")
-                                .HasConstraintName("fk_order_items_orders_order_id");
-                        });
 
                     b.OwnsOne("dafstore.Domain.Contexts.OrderContext.ValueObjects.DeliveryAddress", "DeliveryAddress", b1 =>
                         {
@@ -447,10 +475,46 @@ namespace dafstore.Infrastructure.Persistence.Migrations
                                 .HasConstraintName("fk_orders_orders_id");
                         });
 
+                    b.OwnsMany("dafstore.Domain.Contexts.OrderContext.Entities.OrderItem", "_orderItems", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<decimal>("Price")
+                                .HasColumnType("numeric")
+                                .HasColumnName("price");
+
+                            b1.Property<Guid>("ProductId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("product_id");
+
+                            b1.Property<int>("Quantity")
+                                .HasColumnType("integer")
+                                .HasColumnName("quantity");
+
+                            b1.Property<Guid>("order_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("order_id");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_order_items");
+
+                            b1.HasIndex("order_id")
+                                .HasDatabaseName("ix_order_items_order_id");
+
+                            b1.ToTable("order_items", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("order_id")
+                                .HasConstraintName("fk_order_items_orders_order_id");
+                        });
+
                     b.Navigation("DeliveryAddress")
                         .IsRequired();
 
-                    b.Navigation("OrderItems");
+                    b.Navigation("_orderItems");
                 });
 
             modelBuilder.Entity("dafstore.Domain.Contexts.ShoppingCartContext.ShoppingCart", b =>
@@ -465,22 +529,20 @@ namespace dafstore.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("dafstore.Domain.Contexts.ShoppingCartContext.ShoppingCartItem", b =>
                 {
-                    b.HasOne("dafstore.Domain.Contexts.ShoppingCartContext.ShoppingCart", null)
+                    b.HasOne("dafstore.Domain.Contexts.ShoppingCartContext.ShoppingCart", "ShoppingCart")
                         .WithMany("ShoppingCartItems")
                         .HasForeignKey("ShoppingCartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_shopping_cart_items_shopping_cart_shopping_cart_id");
+
+                    b.Navigation("ShoppingCart");
                 });
 
             modelBuilder.Entity("dafstore.Domain.Contexts.UserContext.Entities.User", b =>
                 {
-                    b.OwnsMany("dafstore.Domain.Contexts.UserContext.ValueObjects.Address", "Addresses", b1 =>
+                    b.OwnsMany("dafstore.Domain.Contexts.UserContext.ValueObjects.Address", "_adresses", b1 =>
                         {
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("user_id");
-
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("integer")
@@ -522,14 +584,21 @@ namespace dafstore.Infrastructure.Persistence.Migrations
                                 .HasColumnType("character varying(200)")
                                 .HasColumnName("street");
 
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("user_id");
+
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
                                 .HasMaxLength(256)
                                 .HasColumnType("character varying(256)")
                                 .HasColumnName("zip_code");
 
-                            b1.HasKey("UserId", "Id")
+                            b1.HasKey("Id")
                                 .HasName("pk_address");
+
+                            b1.HasIndex("UserId")
+                                .HasDatabaseName("ix_address_user_id");
 
                             b1.ToTable("address", (string)null);
 
@@ -588,13 +657,13 @@ namespace dafstore.Infrastructure.Persistence.Migrations
                                 .HasConstraintName("fk_users_users_id");
                         });
 
-                    b.Navigation("Addresses");
-
                     b.Navigation("Email")
                         .IsRequired();
 
                     b.Navigation("Phone")
                         .IsRequired();
+
+                    b.Navigation("_adresses");
                 });
 
             modelBuilder.Entity("dafstore.Domain.Contexts.ShoppingCartContext.ShoppingCart", b =>
@@ -604,10 +673,10 @@ namespace dafstore.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("dafstore.Domain.Contexts.UserContext.Entities.User", b =>
                 {
-                    b.Navigation("Orders");
-
                     b.Navigation("ShoppingCart")
                         .IsRequired();
+
+                    b.Navigation("_orders");
                 });
 #pragma warning restore 612, 618
         }

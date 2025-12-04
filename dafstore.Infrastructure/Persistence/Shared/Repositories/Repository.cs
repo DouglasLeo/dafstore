@@ -26,7 +26,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Entity
     public async Task<TEntity?> FindByIdAsync(Guid id) => await DbSet.FindAsync(id);
 
     public async Task<IEnumerable<TEntity>> FindAllByIdsAsync(IEnumerable<Guid> ids) =>
-        await DbSet.Where(i => ids.Contains(i.Id)).AsNoTracking().ToListAsync();
+        await DbSet.Where(i => ids.Contains(i.Id)).ToListAsync();
 
     public async Task<IEnumerable<TEntity>> SearchAsync(Expression<Func<TEntity, bool>> predicate) =>
         await DbSet.AsNoTracking().Where(predicate).ToListAsync();

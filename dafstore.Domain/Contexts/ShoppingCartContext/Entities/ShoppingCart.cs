@@ -4,7 +4,7 @@ namespace dafstore.Domain.Contexts.ShoppingCartContext;
 
 public class ShoppingCart : Entity
 {
-    private List<ShoppingCartItem> _shoppingCartItem = [];
+    private readonly List<ShoppingCartItem> _shoppingCartItems = [];
 
     private ShoppingCart() { }
 
@@ -14,18 +14,26 @@ public class ShoppingCart : Entity
     }
 
     public Guid UserId { get; private set; }
-    public IReadOnlyCollection<ShoppingCartItem> ShoppingCartItems => _shoppingCartItem.ToArray();
+    public IReadOnlyCollection<ShoppingCartItem> ShoppingCartItems => _shoppingCartItems;
 
     public void AddShoppingCartItem(ShoppingCartItem item)
     {
-        _shoppingCartItem.Clear();
-        _shoppingCartItem.Add(item);
+        _shoppingCartItems.Clear();
+        _shoppingCartItems.Add(item);
     }
 
-    public void AddShoppingCartItems(IEnumerable<ShoppingCartItem> items)
+    public void UpdateShoppingCartItems(IEnumerable<ShoppingCartItem> items)
     {
-        _shoppingCartItem.Clear();
-        _shoppingCartItem.AddRange(items);
+        var itemsById = items.ToDictionary(i => i.ProductId);
+
+        foreach (var shoppingCartItem in _shoppingCartItems)
+        {
+            if (!itemsById.TryGetValue(shoppingCartItem.ProductId, out var item)) 
+                continue;
+
+            shoppingCartItem.UpdatePrice(item.Price);
+            shoppingCartItem.UpdateQuantity(item.Quantity);
+        }
     }
 }
 
@@ -42,6 +50,7 @@ public class ShoppingCartItem
 
     public Guid Id { get; }
     public Guid ShoppingCartId { get; }
+    public ShoppingCart ShoppingCart { get; private set; }
     public Guid ProductId { get; private set; }
     public int Quantity { get; private set; }
     public decimal Price { get; private set; }

@@ -6,7 +6,7 @@ namespace dafstore.Application.Products.Queries.GetShorts;
 
 public record GetShortsByIdQuery(Guid Id) : IRequest<ShortsDTO>;
 
-public class GetShortsByIdQueryHandler<T> : IRequestHandler<GetShortsByIdQuery, ShortsDTO>
+public class GetShortsByIdQueryHandler : IRequestHandler<GetShortsByIdQuery, ShortsDTO>
 {
     private readonly IShortsRepository _repository;
     private readonly IMapper _mapper;

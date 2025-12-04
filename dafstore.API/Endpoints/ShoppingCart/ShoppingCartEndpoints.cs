@@ -15,35 +15,42 @@ public class ShoppingCartEndpoints : EndpointGroupBase
     public override void Map(WebApplication app)
     {
         app.MapGroup(this)
-            //.RequireAuthorization()
+            .RequireAuthorization()
             .MapGet(GetShoppingCartByUserAsync, "{userId}")
             .MapPost(CreateShoppingCart)
             .MapPut(UpdateShoppingCart, "{id}")
             .MapDelete(DeleteShoppingCart, "{id}");
     }
 
-    public async Task<Results<Ok<ShoppingCartDTO>, NotFound>> GetShoppingCartByUserAsync(ISender sender, Guid userId)
+    public async Task<Results<Ok<ShoppingCartDTO>, NotFound>> GetShoppingCartByUserAsync(
+        [FromRoute] Guid userId,
+        ISender sender) 
     {
         var result = await sender.Send(new GetShoppingCartByUserIdQuery(userId));
 
         return result != null ? TypedResults.Ok(result) : TypedResults.NotFound();
     }
 
-    public async Task<Results<Created<Guid>, ValidationProblem>> CreateShoppingCart(ISender sender,
-        IValidator<CreateShoppingCartCommand> validator, [FromBody] CreateShoppingCartCommand command,
+    public async Task<Results<Created<Guid>,BadRequest, ValidationProblem>> CreateShoppingCart(
+        [FromBody] CreateShoppingCartCommand command,
+        ISender sender,
+        IValidator<CreateShoppingCartCommand> validator,
         CancellationToken cancellationToken)
     {
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
-
+        //TODO: Criar endpoint para adicionar items no carrinho
         if (!validationResult.IsValid) return TypedResults.ValidationProblem(validationResult.ToDictionary());
 
         var id = await sender.Send(command, cancellationToken);
 
-        return TypedResults.Created($"/{nameof(ShoppingCartEndpoints)}/{id}", id);
+        return id == Guid.Empty ? TypedResults.BadRequest() :TypedResults.Created($"/{nameof(ShoppingCartEndpoints)}/{id}", id);
     }
 
-    public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdateShoppingCart(ISender sender,
-        IValidator<UpdateShoppingCartCommand> validator, Guid id, [FromBody] UpdateShoppingCartCommand command,
+    public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdateShoppingCart(
+        [FromRoute] Guid id, 
+        [FromBody] UpdateShoppingCartCommand command,
+        ISender sender,
+        IValidator<UpdateShoppingCartCommand> validator,
         CancellationToken cancellationToken)
     {
         if (id != command.Id) return TypedResults.BadRequest();
@@ -57,8 +64,10 @@ public class ShoppingCartEndpoints : EndpointGroupBase
         return result != Guid.Empty ? TypedResults.NoContent() : TypedResults.NotFound();
     }
 
-    public async Task<Results<NoContent, NotFound, BadRequest>> DeleteShoppingCart(ISender sender, Guid id,
+    public async Task<Results<NoContent, NotFound, BadRequest>> DeleteShoppingCart(
+        [FromRoute] Guid id,
         [FromBody] DeleteUserCommand command,
+        ISender sender, 
         CancellationToken cancellationToken)
     {
         if (id != command.Id) return TypedResults.BadRequest();

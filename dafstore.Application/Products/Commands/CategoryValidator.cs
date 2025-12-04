@@ -1,9 +1,9 @@
-using dafstore.Domain.Contexts.ProductContext.Entities;
+using dafstore.Application.Products.Commands.Shared;
 using FluentValidation;
 
 namespace dafstore.Application.Products.Commands;
 
-public class CategoryValidator : AbstractValidator<Category>
+public class CategoryValidator : AbstractValidator<CategoryDTO>
 {
     public CategoryValidator()
     {

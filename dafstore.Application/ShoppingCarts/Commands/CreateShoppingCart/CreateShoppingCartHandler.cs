@@ -22,6 +22,10 @@ public class CreateShoppingCartHandler : IRequestHandler<CreateShoppingCartComma
 
     public async Task<Guid> Handle(CreateShoppingCartCommand request, CancellationToken cancellationToken)
     {
+        var existentCart = await _repository.GetByUserIdAsync(request.UserId);
+        if (existentCart is not null)
+            return Guid.Empty;
+        
         var shoppingCart = new ShoppingCart(request.UserId);
 
         var firstShoppingCartItem =

@@ -9,21 +9,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace dafstore.API.Endpoints.Products
 {
-    public class ShirtsEndpoints : ProductsEndpoints<ShirtDTO>
+    public class ShirtsEndpoints : EndpointGroupBase
     {
         public override void Map(WebApplication app)
         {
-            base.Map(app);
             app.MapGroup(this)
-                //.RequireAuthorization()
+                .RequireAuthorization()
                 .MapGet(GetAllShirtAsync)
                 .MapGet(GetShirtByIdAsync, "{id}")
                 .MapPost(CreateShirt)
                 .MapPut(UpdateShirt, "{id}");
         }
 
-        public async Task<Results<Ok<IEnumerable<ShirtDTO>>, ValidationProblem>> GetAllShirtAsync(ISender sender,
-            IValidator<GetAllShirtsQuery> validator, [AsParameters] GetAllShirtsQuery query)
+        public async Task<Results<Ok<IEnumerable<ShirtDTO>>, ValidationProblem>> GetAllShirtAsync(
+            [AsParameters] GetAllShirtsQuery query,
+            ISender sender,
+            IValidator<GetAllShirtsQuery> validator)
         {
             var validationResult = await validator.ValidateAsync(query);
 
@@ -32,15 +33,19 @@ namespace dafstore.API.Endpoints.Products
             return TypedResults.Ok(await sender.Send(query));
         }
 
-        public async Task<Results<Ok<ShirtDTO>, NotFound>> GetShirtByIdAsync(ISender sender, Guid id)
+        public async Task<Results<Ok<ShirtDTO>, NotFound>> GetShirtByIdAsync(
+            [FromRoute] Guid id,
+            ISender sender)
         {
             var result = await sender.Send(new GetShirtByIdQuery(id));
 
             return result != null ? TypedResults.Ok(result) : TypedResults.NotFound();
         }
 
-        public async Task<Results<Created<Guid>, ValidationProblem>> CreateShirt(ISender sender,
-            IValidator<CreateShirtCommand> validator, [FromBody] CreateShirtCommand command,
+        public async Task<Results<Created<Guid>, ValidationProblem>> CreateShirt(
+            [FromBody] CreateShirtCommand command,
+            ISender sender,
+            IValidator<CreateShirtCommand> validator, 
             CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(command, cancellationToken);
@@ -48,12 +53,15 @@ namespace dafstore.API.Endpoints.Products
             if (!validationResult.IsValid) return TypedResults.ValidationProblem(validationResult.ToDictionary());
 
             var id = await sender.Send(command, cancellationToken);
-            //TODO:Verificar URL Final
+
             return TypedResults.Created($"/{nameof(ShirtsEndpoints)}/{id}", id);
         }
 
-        public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdateShirt(ISender sender,
-            IValidator<UpdateShirtCommand> validator, Guid id, [FromBody] UpdateShirtCommand command,
+        public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdateShirt(
+            [FromRoute] Guid id,
+            [FromBody] UpdateShirtCommand command,
+            ISender sender,
+            IValidator<UpdateShirtCommand> validator,
             CancellationToken cancellationToken)
         {
             if (id != command.Id) return TypedResults.BadRequest();
