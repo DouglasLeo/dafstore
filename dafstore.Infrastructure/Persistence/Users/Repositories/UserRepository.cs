@@ -14,8 +14,12 @@ public class UserRepository : Repository<User>, IUserRepository
     }
 
     public async Task<User?> FindUserByEmail(Email email) =>
-        await DbSet.SingleAsync(u => u.Email == email);
+        await DbSet.AsNoTracking().SingleOrDefaultAsync(u => u.Email.EmailAddress == email.EmailAddress);
+
+    public async Task<User?> FindUserByEmailIncludeRoles(Email email) =>
+        await DbSet.AsNoTracking().Include(r => r.Roles)
+            .SingleOrDefaultAsync(u => u.Email.EmailAddress == email.EmailAddress);
 
     public async Task<User?> FindUserByPhone(Phone phone) =>
-        await DbSet.SingleAsync(u => u.Phone == phone);
+        await DbSet.AsNoTracking().SingleOrDefaultAsync(u => u.Phone.PhoneNumber == phone.PhoneNumber);
 }

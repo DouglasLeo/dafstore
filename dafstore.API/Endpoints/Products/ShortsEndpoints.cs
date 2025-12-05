@@ -9,21 +9,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace dafstore.API.Endpoints.Products;
 
-public class ShortsEndpoints : ProductsEndpoints<ShortsDTO>
+public class ShortsEndpoints : EndpointGroupBase
 {
     public override void Map(WebApplication app)
     {
-        base.Map(app);
         app.MapGroup(this)
-            //.RequireAuthorization()
+            .RequireAuthorization()
             .MapGet(GetAllShortsAsync)
-            .MapGet(GetProductByIdAsync)
+            .MapGet(GetShortByIdAsync,"{id}" )
             .MapPost(CreateShorts)
             .MapPut(UpdateShorts, "{id}");
     }
 
-    public async Task<Results<Ok<IEnumerable<ShortsDTO>>, ValidationProblem>> GetAllShortsAsync(ISender sender,
-        IValidator<GetAllShortsQuery> validator, [AsParameters] GetAllShortsQuery query)
+    public async Task<Results<Ok<IEnumerable<ShortsDTO>>, ValidationProblem>> GetAllShortsAsync(
+        [AsParameters] GetAllShortsQuery query,
+        ISender sender,
+        IValidator<GetAllShortsQuery> validator)
     {
         var validationResult = await validator.ValidateAsync(query);
 
@@ -32,15 +33,19 @@ public class ShortsEndpoints : ProductsEndpoints<ShortsDTO>
         return TypedResults.Ok(await sender.Send(query));
     }
 
-    public async Task<Results<Ok<ShortsDTO>, NotFound>> GetProductByIdAsync(ISender sender, Guid id)
+    public async Task<Results<Ok<ShortsDTO>, NotFound>> GetShortByIdAsync(
+        [FromRoute] Guid id,
+        ISender sender)
     {
         var result = await sender.Send(new GetShortsByIdQuery(id));
 
         return result != null ? TypedResults.Ok(result) : TypedResults.NotFound();
     }
 
-    public async Task<Results<Created<Guid>, ValidationProblem>> CreateShorts(ISender sender,
-        IValidator<CreateShortsCommand> validator, [FromBody] CreateShortsCommand command,
+    public async Task<Results<Created<Guid>, ValidationProblem>> CreateShorts(
+        [FromBody] CreateShortsCommand command,
+        ISender sender,
+        IValidator<CreateShortsCommand> validator,
         CancellationToken cancellationToken)
     {
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
@@ -48,12 +53,15 @@ public class ShortsEndpoints : ProductsEndpoints<ShortsDTO>
         if (!validationResult.IsValid) return TypedResults.ValidationProblem(validationResult.ToDictionary());
 
         var id = await sender.Send(command, cancellationToken);
-        //TODO:Verificar URL Final
+
         return TypedResults.Created($"/{nameof(PantsEndpoints)}/{id}", id);
     }
 
-    public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdateShorts(ISender sender,
-        IValidator<UpdateShortsCommand> validator, Guid id, [FromBody] UpdateShortsCommand command,
+    public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdateShorts(
+        [FromRoute] Guid id,
+        [FromBody] UpdateShortsCommand command,
+        ISender sender,
+        IValidator<UpdateShortsCommand> validator,
         CancellationToken cancellationToken)
     {
         if (id != command.Id) return TypedResults.BadRequest();

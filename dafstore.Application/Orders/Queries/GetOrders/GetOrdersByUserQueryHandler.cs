@@ -4,9 +4,9 @@ using MediatR;
 
 namespace dafstore.Application.Orders.Queries.GetOrders;
 
-public record GetOrderByUserIdQuery(Guid UserId) : IRequest<OrderDTO>;
+public record GetOrderByUserIdQuery(Guid UserId) : IRequest<IEnumerable<OrderDTO>>;
 
-public class GetOrdersByUserQueryHandler : IRequestHandler<GetOrderByUserIdQuery, OrderDTO>
+public class GetOrdersByUserQueryHandler : IRequestHandler<GetOrderByUserIdQuery, IEnumerable<OrderDTO>>
 {
     private readonly IOrderRepository _repository;
     private readonly IMapper _mapper;
@@ -17,6 +17,6 @@ public class GetOrdersByUserQueryHandler : IRequestHandler<GetOrderByUserIdQuery
         _mapper = mapper;
     }
 
-    public async Task<OrderDTO> Handle(GetOrderByUserIdQuery request, CancellationToken cancellationToken) =>
-        _mapper.Map<OrderDTO>(await _repository.GetOrderByUserIdAsync(request.UserId));
+    public async Task<IEnumerable<OrderDTO>> Handle(GetOrderByUserIdQuery request, CancellationToken cancellationToken) =>
+        _mapper.Map<IEnumerable<OrderDTO>>(await _repository.GetOrderByUserIdAsync(request.UserId));
 }

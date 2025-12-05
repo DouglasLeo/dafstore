@@ -16,15 +16,16 @@ public class UpdateShoppingCartHandler : IRequestHandler<UpdateShoppingCartComma
     private readonly IRepository<Product> _productRepository;
     private readonly IMapper _mapper;
 
-    public UpdateShoppingCartHandler(IShoppingCartRepository repository, IMapper mapper)
+    public UpdateShoppingCartHandler(IShoppingCartRepository repository, IRepository<Product> productRepository, IMapper mapper)
     {
         _repository = repository;
+        _productRepository = productRepository;
         _mapper = mapper;
     }
 
     public async Task<Guid> Handle(UpdateShoppingCartCommand request, CancellationToken cancellationToken)
     {
-        var shoppingCart = await _repository.FindByIdAsync(request.Id);
+        var shoppingCart = await _repository.GetByIdAsync(request.Id);
         if (shoppingCart is null) return Guid.Empty;
 
         var productIds = request.Items.Select(i => i.ProductId).ToList();
@@ -35,7 +36,7 @@ public class UpdateShoppingCartHandler : IRequestHandler<UpdateShoppingCartComma
         if (missingProducts.Count != 0)
             throw new Exception($"Invalid products: {string.Join(", ", missingProducts)}");
 
-        shoppingCart.AddShoppingCartItems(_mapper.Map<List<ShoppingCartItem>>(request.Items));
+        shoppingCart.UpdateShoppingCartItems(_mapper.Map<List<ShoppingCartItem>>(request.Items));
 
         await _repository.UpdateAsync(shoppingCart);
         await _repository.SaveChangesAsync();

@@ -9,21 +9,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace dafstore.API.Endpoints.Products;
 
-public class PantsEndpoints : ProductsEndpoints<PantsDTO>
+public class PantsEndpoints : EndpointGroupBase
 {
     public override void Map(WebApplication app)
     {
-        base.Map(app);
         app.MapGroup(this)
-            //.RequireAuthorization()
+            .RequireAuthorization()
             .MapGet(GetAllPantsAsync)
             .MapGet(GetPantsByIdAsync, "{id}")
             .MapPost(CreatePantsAsync)
             .MapPut(UpdatePants, "{id}");
     }
 
-    public async Task<Results<Ok<IEnumerable<PantsDTO>>, ValidationProblem>> GetAllPantsAsync(ISender sender,
-        IValidator<GetAllPantsQuery> validator, [AsParameters] GetAllPantsQuery query)
+    public async Task<Results<Ok<IEnumerable<PantsDTO>>, ValidationProblem>> GetAllPantsAsync(
+        [AsParameters] GetAllPantsQuery query,
+        ISender sender,
+        IValidator<GetAllPantsQuery> validator)
     {
         var validationResult = await validator.ValidateAsync(query);
 
@@ -34,15 +35,19 @@ public class PantsEndpoints : ProductsEndpoints<PantsDTO>
 
     //TODO:Fazer o get especifico por tipo para pants shirts e shorts
 
-    public async Task<Results<Ok<PantsDTO>, NotFound>> GetPantsByIdAsync(ISender sender, Guid id)
+    public async Task<Results<Ok<PantsDTO>, NotFound>> GetPantsByIdAsync(
+        [FromRoute] Guid id,
+        ISender sender)
     {
         var result = await sender.Send(new GetPantsByIdQuery(id));
 
         return result != null ? TypedResults.Ok(result) : TypedResults.NotFound();
     }
 
-    public async Task<Results<Created<Guid>, ValidationProblem>> CreatePantsAsync(ISender sender,
-        CreatePantsCommand command, CreatePantsRequestValidation validator,
+    public async Task<Results<Created<Guid>, ValidationProblem>> CreatePantsAsync(
+        [FromBody] CreatePantsCommand command, 
+        ISender sender,
+        CreatePantsRequestValidation validator,
         CancellationToken cancellationToken = default)
     {
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
@@ -54,8 +59,10 @@ public class PantsEndpoints : ProductsEndpoints<PantsDTO>
         return TypedResults.Created($"/{nameof(PantsEndpoints)}/{id}", id);
     }
 
-    public async Task<Results<Created<Guid>, ValidationProblem>> CreatePants(ISender sender,
-        IValidator<CreatePantsCommand> validator, [FromBody] CreatePantsCommand command,
+    public async Task<Results<Created<Guid>, ValidationProblem>> CreatePants(
+        [FromBody] CreatePantsCommand command,
+        ISender sender,
+        IValidator<CreatePantsCommand> validator,
         CancellationToken cancellationToken)
     {
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
@@ -63,12 +70,15 @@ public class PantsEndpoints : ProductsEndpoints<PantsDTO>
         if (!validationResult.IsValid) return TypedResults.ValidationProblem(validationResult.ToDictionary());
 
         var id = await sender.Send(command, cancellationToken);
-        //TODO:Verificar URL Final
+
         return TypedResults.Created($"/{nameof(PantsEndpoints)}/{id}", id);
     }
 
-    public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdatePants(ISender sender,
-        IValidator<UpdatePantsCommand> validator, Guid id, [FromBody] UpdatePantsCommand command,
+    public async Task<Results<NoContent, NotFound, BadRequest, ValidationProblem>> UpdatePants(
+        [FromRoute] Guid id, 
+        [FromBody] UpdatePantsCommand command,
+        ISender sender,
+        IValidator<UpdatePantsCommand> validator, 
         CancellationToken cancellationToken)
     {
         if (id != command.Id) return TypedResults.BadRequest();

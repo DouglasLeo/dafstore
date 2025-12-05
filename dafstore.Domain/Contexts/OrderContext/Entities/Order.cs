@@ -6,27 +6,30 @@ namespace dafstore.Domain.Contexts.OrderContext.Entities;
 
 public class Order : Entity
 {
+    private readonly List<OrderItem> _orderItems = new();
+    
     private Order () { }
     
     public Order(Guid userId, DateTimeOffset orderDate, EOrderStatus orderStatus,
-        IReadOnlyCollection<OrderItem> orderItems, EPaymentMethod paymentMethod, decimal total,
+        IReadOnlyCollection<OrderItem> orderItems, EPaymentMethod paymentMethod,
         DeliveryAddress deliveryAddress)
     {
         UserId = userId;
         OrderDate = orderDate;
         OrderStatus = orderStatus;
-        OrderItems = orderItems;
+        _orderItems = orderItems?.ToList() ?? new List<OrderItem>();
         PaymentMethod = paymentMethod;
-        Total = total;
         DeliveryAddress = deliveryAddress;
+
+        CalculeTotal();
     }
 
     public Guid UserId { get; }
     public DateTimeOffset OrderDate { get; }
     public EOrderStatus OrderStatus { get; private set; }
-    public IReadOnlyCollection<OrderItem> OrderItems { get; }
+    public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
     public EPaymentMethod PaymentMethod { get; }
-    public decimal Total { get; }
+    public decimal Total { get; private set; }
     public DeliveryAddress DeliveryAddress { get; }
 
     public void UpdateStatus(EOrderStatus status)
@@ -36,6 +39,14 @@ public class Order : Entity
 
         OrderStatus = status;
     }
+    
+    private void CalculeTotal()
+    {
+        Total = _orderItems.Sum(i => i.Price * i.Quantity);
+    }
 }
 
-public record OrderItem(Guid ProductId, int Quantity, decimal Price);
+public record OrderItem(Guid ProductId, int Quantity, decimal Price)
+{
+    public Guid Id { get; init; } = Guid.NewGuid();
+}
